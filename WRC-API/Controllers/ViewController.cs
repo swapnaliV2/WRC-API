@@ -10,19 +10,21 @@ using WRC_API.Services;
 using Newtonsoft.Json;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
-
+using WRC_API.HelperClass;
 namespace WRC_API.Controllers
 {
     [RoutePrefix("View")]
     public class ViewController : ApiController
     {
         private FormRenderService _renderService;
+        
         public ViewController() : this(new FormRenderService()) { }
 
         public ViewController(FormRenderService service)
         {
             _renderService = service;
         }
+
         [Route("Execute/{commanName}"), HttpPost]
         public void ExecuteNonQuery([FromUri] string commanName, [FromBody]Dictionary<string, string> paramSet)
         {
@@ -30,53 +32,37 @@ namespace WRC_API.Controllers
             watch.Start();
             _renderService.ExecuteNonQuery(commanName, paramSet);
             watch.Stop();
-            //_logger.Info(string.Format("Entire Call for {0} took {1}", form, watch.ElapsedMilliseconds));
             //return data;
         }
-
 
         [Route("ExecuteDS/{commanName}"), HttpPost]
         public async Task<string> ExecuteDataset([FromUri] string commanName, [FromBody]Dictionary<string, string> paramSet)
         {
             Stopwatch watch = new Stopwatch();
-            watch.Start();
-            //var Result1 = await _renderService.ExecuteDataSet(commanName, paramSet);
+            watch.Start();            
             var Result =JsonConvert.SerializeObject (await _renderService.ExecuteDataSet(commanName, paramSet),Formatting.None );
-            var minfyJson = Regex.Replace(Result, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
-            //GZipStream com = new GZipStream(Result1, CompressionMode.Compress);
             watch.Stop();
-            //_logger.Info(string.Format("Entire Call for {0} took {1}", form, watch.ElapsedMilliseconds));
-            return minfyJson;
+            var minifyJson = Regex.Replace(Result, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
+            var compStr =GZipCompressDecompress.Zip(minifyJson);
+            return compStr;
         }
 
-        [Route("UpdateNQ/{commanName}"), HttpPost]
-        public void UpdateNonQuery([FromUri] string commanName, [FromBody]Dictionary<string, string> paramSet)
-        {
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            _renderService.UpdateNonQuery(commanName, paramSet);
-            watch.Stop();
-        }
-
-        [Route("DeleteNQ/{commanName}"), HttpPost]
-        public void DeleteNonQuery([FromUri] string commanName, [FromBody]Dictionary<string, string> paramSet)
-        {
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            _renderService.DeleteNonQuery(commanName, paramSet);
-            watch.Stop();
-        }
-
-        //[Route("for/{formname}"), HttpPost]
-        //public async Task StartUp([FromUri] string form, [FromBody]Dictionary<string, object> paramSet)
+        //[Route("UpdateNQ/{commanName}"), HttpPost]
+        //public void UpdateNonQuery([FromUri] string commanName, [FromBody]Dictionary<string, string> paramSet)
         //{
         //    Stopwatch watch = new Stopwatch();
         //    watch.Start();
-        //    await _renderService.Fetch(form, paramSet);
-
+        //    _renderService.UpdateNonQuery(commanName, paramSet);
         //    watch.Stop();
-        //    //_logger.Info(string.Format("Entire Call for {0} took {1}", form, watch.ElapsedMilliseconds));
-        //    //return data;
         //}
+
+        //[Route("DeleteNQ/{commanName}"), HttpPost]
+        //public void DeleteNonQuery([FromUri] string commanName, [FromBody]Dictionary<string, string> paramSet)
+        //{
+        //    Stopwatch watch = new Stopwatch();
+        //    watch.Start();
+        //    _renderService.DeleteNonQuery(commanName, paramSet);
+        //    watch.Stop();
+        //}      
     }
 }
