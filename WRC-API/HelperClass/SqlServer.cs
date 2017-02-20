@@ -16,28 +16,25 @@ namespace WRC_API.HelperClass
 
         public SqlServer()
         {
-
             _conStr = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
             if (string.IsNullOrEmpty(_conStr))
                 throw new ArgumentNullException("Provided Connection string is not present in Connection String Section of Config");
         }
+       
 
         public void ExecuteDataNQ(string command, Dictionary<string, string> parameters, CommandType commandType)
         {
             Stopwatch innerWatch = new Stopwatch();
             innerWatch.Start();
 
-            string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ToString();
-
-            SqlConnection con = new SqlConnection(connectionString);
             using (SqlConnection connection = new SqlConnection(_conStr))
             {
                 try
                 {
-                    if (con.State != ConnectionState.Open)
-                        con.Open();
+                    if (connection.State != ConnectionState.Open)
+                        connection.Open();
 
-                    using (SqlCommand sqlCommand = new SqlCommand(command, con))
+                    using (SqlCommand sqlCommand = new SqlCommand(command, connection))
                     {
                         sqlCommand.CommandType = commandType;
                         foreach (var param in parameters)
@@ -46,7 +43,6 @@ namespace WRC_API.HelperClass
                         }
                         sqlCommand.ExecuteNonQueryAsync();
                         innerWatch.Stop();
-                        AppLogger.LogTimer(innerWatch);
                     }
                 }
                 catch (Exception ex)
@@ -56,89 +52,54 @@ namespace WRC_API.HelperClass
                 }
                 finally
                 {
-                    if (con.State != ConnectionState.Open)
-                        con.Close();
+                    if (connection.State != ConnectionState.Open)
+                        connection.Close();
                     innerWatch.Stop();
                 }
             }
-           
+
         }
-        //public async Task ExecuteDataReader<T>(IDictionary<string, List<SqlParameter>> procList)
-        //{
-        //    SqlDataReader reader = null;
-        //    KeyValuePair<string, T> kvp;
-        //    using (SqlConnection connection = new SqlConnection(_conStr))
-        //    {
-        //        await connection.OpenAsync();
-        //        if (connection.State != ConnectionState.Open)
-        //            connection.Open();
 
-        //        using (SqlCommand command = new SqlCommand(procName, connection))
-        //        {
-        //            command.CommandType = CommandType.StoredProcedure;
-
-        //            if (paramList != null)
-        //            {
-        //                foreach (var param in paramList)
-        //                    command.Parameters.Add(param);
-        //            }
-        //            Stopwatch watch = new Stopwatch();
-        //            watch.Start();
-        //            reader = await command.ExecuteReaderAsync();
-
-        //            watch.Stop();
-        //            _logger.Info(string.Format("{0} took {1} milliseconds", procName, watch.ElapsedMilliseconds));
-        //            kvp = new KeyValuePair<string, T>(procName, output(reader));
-        //        }
-        //    }
-        //}
-
-        public async Task<Dictionary<string, T>> ExecuteDataReader<T>(IDictionary<string, List<SqlParameter>> procList, Func<SqlDataReader, T> output)
+        public async Task<DataTable> ExecuteData(string command, Dictionary<string, string> parameters, CommandType commandType)
         {
-            Dictionary<string, T> resultDictionary = new Dictionary<string, T>();
-            T result = default(T);
-            var taskList = new List<Task<KeyValuePair<string, T>>>();
+            Stopwatch innerWatch = new Stopwatch();
+            DataTable dtData = new DataTable();
+            innerWatch.Start();
             using (SqlConnection connection = new SqlConnection(_conStr))
             {
-                await connection.OpenAsync();
-
-                foreach (var current in procList)
-                    taskList.Add(ExecuteDataReader(connection, current.Value, current.Key, output));
-
-                foreach (var task in await Task.WhenAll(taskList))
-                    resultDictionary.Add(task.Key, task.Value);
-
-            }
-            return resultDictionary;
-        }
-
-        private async Task<KeyValuePair<string, T>> ExecuteDataReader<T>(SqlConnection connection, List<SqlParameter> paramList, string procName, Func<SqlDataReader, T> output)
-        {
-            SqlDataReader reader = null;
-            KeyValuePair<string, T> kvp;
-            if (connection.State != ConnectionState.Open)
-                connection.Open();
-
-            using (SqlCommand command = new SqlCommand(procName, connection))
-            {
-                command.CommandType = CommandType.StoredProcedure;
-
-                if (paramList != null)
+                try
                 {
-                    foreach (var param in paramList)
-                        command.Parameters.Add(param);
+                    if (connection.State != ConnectionState.Open)
+                        connection.Open();
+
+                    using (SqlCommand sqlCommand = new SqlCommand(command, connection))
+                    {
+                        sqlCommand.CommandType = commandType;
+                        foreach (var param in parameters)
+                        {
+                            sqlCommand.Parameters.Add(new SqlParameter(param.Key, param.Value));
+                        }
+
+                        SqlDataReader dr = await sqlCommand.ExecuteReaderAsync();
+                        dtData.Load(dr);
+                        innerWatch.Stop();
+                        AppLogger.LogTimer(innerWatch);
+                    }
                 }
-                Stopwatch watch = new Stopwatch();
-                watch.Start();
-                reader = await command.ExecuteReaderAsync();
-
-                watch.Stop();
-                AppLogger.LogTimer(watch);
-                //_logger.Info(string.Format("{0} took {1} milliseconds", procName, watch.ElapsedMilliseconds));
-                kvp = new KeyValuePair<string, T>(procName, output(reader));
+                catch (Exception ex)
+                {
+                    innerWatch.Stop();
+                    AppLogger.LogError(ex);
+                    // return 1;
+                }
+                finally
+                {
+                    if (connection.State != ConnectionState.Open)
+                        connection.Close();
+                    innerWatch.Stop();
+                }
+                return dtData;
             }
-
-            return kvp;
         }
     }
 }
