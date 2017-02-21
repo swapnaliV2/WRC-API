@@ -22,13 +22,13 @@ namespace WRC_API.Services
             _sqlServer = server;
         }
 
-        public void ExecuteNonQuery(string commmandName, Dictionary<string, string> Parameters)
+        public void ExecuteNonQuery(string commmandName, Dictionary<string, object> Parameters)
         {
             Task.Run(() =>
                 _sqlServer.ExecuteDataNQ(commmandName, Parameters, CommandType.StoredProcedure));
         }
 
-        public async Task<DataTable> ExecuteDataSet(string commmandName, Dictionary<string, string> Parameters)
+        public async Task<DataSet> ExecuteDataSet(string commmandName, Dictionary<string, object> Parameters)
         {
             return await _sqlServer.ExecuteData(commmandName, Parameters, CommandType.StoredProcedure);
         }

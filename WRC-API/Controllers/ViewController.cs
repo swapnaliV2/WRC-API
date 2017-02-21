@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
 using WRC_API.HelperClass;
+using System.Data;
 namespace WRC_API.Controllers
 {
     [RoutePrefix("View")]
@@ -26,9 +27,14 @@ namespace WRC_API.Controllers
         }
 
         [Route("Execute/{commanName}"), HttpPost]
-        public void ExecuteNonQuery([FromUri] string commanName, [FromBody]Dictionary<string, string> paramSet)
-        {
+        public void ExecuteNonQuery([FromUri] string commanName, [FromBody] Dictionary<string, object> paramSet)
+        {            
             Stopwatch watch = new Stopwatch();
+            //TODO: Convert compress data into original format
+            //Dictionary<string, object> dcomstr;
+            //var Result = JsonConvert.SerializeObject (paramSet.ToString());
+            //var comStr = GZipCompressDecompress.Zip(Result.ToString ());
+            //var decomStr1 = GZipCompressDecompress.UnZip(comStr); 
             watch.Start();
             _renderService.ExecuteNonQuery(commanName, paramSet);
             watch.Stop();
@@ -36,14 +42,17 @@ namespace WRC_API.Controllers
         }
 
         [Route("ExecuteDS/{commanName}"), HttpPost]
-        public async Task<string> ExecuteDataset([FromUri] string commanName, [FromBody]Dictionary<string, string> paramSet)
+        public async Task<string> ExecuteDataset([FromUri] string commanName, [FromBody]Dictionary<string, object> paramSet)
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();            
             var Result =JsonConvert.SerializeObject (await _renderService.ExecuteDataSet(commanName, paramSet),Formatting.None );
             watch.Stop();
             var minifyJson = Regex.Replace(Result, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
-            var compStr =GZipCompressDecompress.Zip(minifyJson);
+            var compStr  =GZipCompressDecompress.Zip(minifyJson);
+            //var decomStr = GZipCompressDecompress.UnZip (compStr);
+            //DataSet ds = new DataSet();
+            //ds = JsonConvert.DeserializeObject<DataSet>(decomStr);
             return compStr;
         }
 
