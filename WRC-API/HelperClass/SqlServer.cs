@@ -22,7 +22,7 @@ namespace WRC_API.HelperClass
         }
        
 
-        public void ExecuteDataNQ(string command, Dictionary<string, string> parameters, CommandType commandType)
+        public void ExecuteDataNQ(string command, Dictionary<string, object> parameters, CommandType commandType)
         {
             Stopwatch innerWatch = new Stopwatch();
             innerWatch.Start();
@@ -43,6 +43,7 @@ namespace WRC_API.HelperClass
                         }
                         sqlCommand.ExecuteNonQueryAsync();
                         innerWatch.Stop();
+                        AppLogger.LogTimer(innerWatch);
                     }
                 }
                 catch (Exception ex)
@@ -60,10 +61,11 @@ namespace WRC_API.HelperClass
 
         }
 
-        public async Task<DataTable> ExecuteData(string command, Dictionary<string, string> parameters, CommandType commandType)
+        public async Task<DataSet> ExecuteData(string command, Dictionary<string, object> parameters, CommandType commandType)
         {
             Stopwatch innerWatch = new Stopwatch();
             DataTable dtData = new DataTable();
+            DataSet dsData = new DataSet();
             innerWatch.Start();
             using (SqlConnection connection = new SqlConnection(_conStr))
             {
@@ -80,8 +82,10 @@ namespace WRC_API.HelperClass
                             sqlCommand.Parameters.Add(new SqlParameter(param.Key, param.Value));
                         }
 
-                        SqlDataReader dr = await sqlCommand.ExecuteReaderAsync();
-                        dtData.Load(dr);
+                        //SqlDataReader dr = await sqlCommand.ExecuteReaderAsync();
+                        //dtData.Load(dr);
+                        SqlDataAdapter dr =new SqlDataAdapter(sqlCommand);                        
+                        dr.Fill(dsData);
                         innerWatch.Stop();
                         AppLogger.LogTimer(innerWatch);
                     }
@@ -98,7 +102,8 @@ namespace WRC_API.HelperClass
                         connection.Close();
                     innerWatch.Stop();
                 }
-                return dtData;
+                //return dtData;
+                return dsData;
             }
         }
     }
