@@ -30,11 +30,13 @@ namespace WRC_API.Controllers
         public void ExecuteNonQuery([FromUri] string commanName, [FromBody] Dictionary<string, object> paramSet)
         {            
             Stopwatch watch = new Stopwatch();
+
             //TODO: Convert compress data into original format
             //Dictionary<string, object> dcomstr;
             //var Result = JsonConvert.SerializeObject (paramSet.ToString());
             //var comStr = GZipCompressDecompress.Zip(Result.ToString ());
             //var decomStr1 = GZipCompressDecompress.UnZip(comStr); 
+
             watch.Start();
             _renderService.ExecuteNonQuery(commanName, paramSet);
             watch.Stop();
@@ -45,14 +47,17 @@ namespace WRC_API.Controllers
         public async Task<string> ExecuteDataset([FromUri] string commanName, [FromBody]Dictionary<string, object> paramSet)
         {
             Stopwatch watch = new Stopwatch();
-            watch.Start();            
-            var Result =JsonConvert.SerializeObject (await _renderService.ExecuteDataSet(commanName, paramSet),Formatting.None );
+            watch.Start();
+            DataSet  Result = await _renderService.ExecuteDataSet(commanName, paramSet);
+            var JsonResult = JsonConvert.SerializeObject(Result, Formatting.None);
             watch.Stop();
-            var minifyJson = Regex.Replace(Result, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
-            var compStr  =GZipCompressDecompress.Zip(minifyJson);
-            //var decomStr = GZipCompressDecompress.UnZip (compStr);
-            //DataSet ds = new DataSet();
-            //ds = JsonConvert.DeserializeObject<DataSet>(decomStr);
+            var minifyJson = Regex.Replace(JsonResult, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
+            var compStr = GZipCompressDecompress.Zip(minifyJson);
+
+            /* To decompress data and get into its original format(here in DataSet)
+            var decomStr = GZipCompressDecompress.UnZip (compStr);
+            var ds = JsonConvert.DeserializeObject<DataSet>(decomStr);
+           */
             return compStr;
         }
 
