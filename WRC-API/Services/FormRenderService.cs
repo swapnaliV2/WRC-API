@@ -14,35 +14,26 @@ namespace WRC_API.Services
 {
     public class FormRenderService
     {
-        private SqlServer _sqlServer;
-        public FormRenderService() : this(new SqlServer()) { }
-
-        public FormRenderService(SqlServer server)
-        {
-            _sqlServer = server;
-        }
-
-        public void ExecuteNonQuery(string commmandName, Dictionary<string, object> Parameters)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="commmandName"></param>
+        /// <param name="Parameters"></param>
+        public void RaiseDBRequestAndForget(string commmandName, Dictionary<string, object> Parameters)
         {
             Task.Run(() =>
-                _sqlServer.ExecuteDataNQ(commmandName, Parameters, CommandType.StoredProcedure));
+                SqlServer.ExecuteDataNQ(commmandName, Parameters, CommandType.StoredProcedure));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="commmandName"></param>
+        /// <param name="Parameters"></param>
+        /// <returns></returns>
         public async Task<DataSet> ExecuteDataSet(string commmandName, Dictionary<string, object> Parameters)
         {
-            return await _sqlServer.ExecuteData(commmandName, Parameters, CommandType.StoredProcedure);
+            return await SqlServer.ExecuteDataAsync(commmandName, Parameters, CommandType.StoredProcedure);
         }
-
-        //public void UpdateNonQuery(string commmandName, Dictionary<string, string> Parameters)
-        //{
-        //    Task.Run(()=>
-        //        _sqlServer.ExecuteDataNQ(commmandName, Parameters, CommandType.StoredProcedure));               
-        //}
-
-        //public void DeleteNonQuery(string commmandName, Dictionary<string, string> Parameters)
-        //{
-        //    Task.Run(() =>
-        //         _sqlServer.ExecuteDataNQ(commmandName, Parameters, CommandType.StoredProcedure));
-        //}
     }
 }

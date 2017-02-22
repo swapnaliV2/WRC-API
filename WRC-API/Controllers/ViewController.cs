@@ -18,7 +18,7 @@ namespace WRC_API.Controllers
     public class ViewController : ApiController
     {
         private FormRenderService _renderService;
-        
+
         public ViewController() : this(new FormRenderService()) { }
 
         public ViewController(FormRenderService service)
@@ -28,19 +28,11 @@ namespace WRC_API.Controllers
 
         [Route("Execute/{commanName}"), HttpPost]
         public void ExecuteNonQuery([FromUri] string commanName, [FromBody] Dictionary<string, object> paramSet)
-        {            
-            Stopwatch watch = new Stopwatch();
+        {
+            //This will be helping if data send through request will be decompressed.
+            CommonClass.DeCompressData();
 
-            //TODO: Convert compress data into original format
-            //Dictionary<string, object> dcomstr;
-            //var Result = JsonConvert.SerializeObject (paramSet.ToString());
-            //var comStr = GZipCompressDecompress.Zip(Result.ToString ());
-            //var decomStr1 = GZipCompressDecompress.UnZip(comStr); 
-
-            watch.Start();
-            _renderService.ExecuteNonQuery(commanName, paramSet);
-            watch.Stop();
-            //return data;
+            _renderService.RaiseDBRequestAndForget(commanName, paramSet);
         }
 
         [Route("ExecuteDS/{commanName}"), HttpPost]
@@ -48,35 +40,16 @@ namespace WRC_API.Controllers
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            DataSet  Result = await _renderService.ExecuteDataSet(commanName, paramSet);
-            var JsonResult = JsonConvert.SerializeObject(Result, Formatting.None);
-            watch.Stop();
-            var minifyJson = Regex.Replace(JsonResult, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
-            var compStr = GZipCompressDecompress.Zip(minifyJson);
+            DataSet Result = await _renderService.ExecuteDataSet(commanName, paramSet);
 
-            /* To decompress data and get into its original format(here in DataSet)
-            var decomStr = GZipCompressDecompress.UnZip (compStr);
-            var ds = JsonConvert.DeserializeObject<DataSet>(decomStr);
-           */
+            var JsonResult = JsonConvert.SerializeObject(Result, Formatting.None);
+            var minifyJson = Regex.Replace(JsonResult, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
+            var compStr = GZip.GZipCompressDecompress.Zip(minifyJson);
+            watch.Stop();
+
+            AppLogger.LogTimerAPI(watch);
+
             return compStr;
         }
-
-        //[Route("UpdateNQ/{commanName}"), HttpPost]
-        //public void UpdateNonQuery([FromUri] string commanName, [FromBody]Dictionary<string, string> paramSet)
-        //{
-        //    Stopwatch watch = new Stopwatch();
-        //    watch.Start();
-        //    _renderService.UpdateNonQuery(commanName, paramSet);
-        //    watch.Stop();
-        //}
-
-        //[Route("DeleteNQ/{commanName}"), HttpPost]
-        //public void DeleteNonQuery([FromUri] string commanName, [FromBody]Dictionary<string, string> paramSet)
-        //{
-        //    Stopwatch watch = new Stopwatch();
-        //    watch.Start();
-        //    _renderService.DeleteNonQuery(commanName, paramSet);
-        //    watch.Stop();
-        //}      
     }
 }
