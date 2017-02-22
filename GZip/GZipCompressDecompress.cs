@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Web;
 
-namespace WRC_API.HelperClass
+namespace GZip
 {
     public class GZipCompressDecompress
     {
         public static string Zip(string value)
-        {
+        {          
             byte[] buffer = Encoding.UTF8.GetBytes(value);
             MemoryStream ms = new MemoryStream();
             using (GZipStream zip = new GZipStream(ms, CompressionMode.Compress, true))
@@ -34,7 +30,7 @@ namespace WRC_API.HelperClass
 
 
         public static string UnZip(string value)
-        {         
+        {
             byte[] gzBuffer = Convert.FromBase64String(value);
             using (MemoryStream ms = new MemoryStream())
             {
@@ -48,10 +44,9 @@ namespace WRC_API.HelperClass
                 {
                     zip.Read(buffer, 0, buffer.Length);
                 }
-
                 return Encoding.UTF8.GetString(buffer);
+
             }
         }
     }
-   
 }

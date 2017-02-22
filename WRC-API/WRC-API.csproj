@@ -127,7 +127,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="HelperClass\AppLogger.cs" />
-    <Compile Include="HelperClass\GZipCompressDecompress.cs" />
+    <Compile Include="HelperClass\CommonClass.cs" />
     <Compile Include="HelperClass\SqlServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\FormRenderService.cs" />
@@ -148,7 +148,12 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\GZip\GZip.csproj">
+      <Project>{c81b94e6-2cda-436c-bdf1-4b1bbb2d7061}</Project>
+      <Name>GZip</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
     <None Include="Project_Readme.html" />

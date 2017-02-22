@@ -6,7 +6,8 @@ namespace WRC_API.HelperClass
 {
     public class AppLogger
     {
-        static string _FileName = "D:/IOTLogger.txt";
+        static string _FileName = "D:/WRCLogger.txt";
+        static string _FileNameAPI = "D:/WRCLoggerAPI.txt";
         public static void LogError(Exception ex)
         {
             try
@@ -23,6 +24,16 @@ namespace WRC_API.HelperClass
             {
                 string logMessageToLog = string.Concat("Time Taken : ", watch.ElapsedMilliseconds, " MilliSeconds", Environment.NewLine);
                 File.AppendAllText(_FileName, logMessageToLog);
+            }
+            catch { }
+        }
+        
+        public static void LogTimerAPI(Stopwatch watch)
+        {
+            try
+            {
+                string logMessageToLog = string.Concat("Time Taken : ", watch.ElapsedMilliseconds, " MilliSeconds", Environment.NewLine);
+                File.AppendAllText(_FileNameAPI, logMessageToLog);
             }
             catch { }
         }

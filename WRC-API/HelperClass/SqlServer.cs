@@ -12,22 +12,20 @@ namespace WRC_API.HelperClass
 {
     public class SqlServer
     {
-        private string _conStr = string.Empty;
+        public static string ConnectionString { get; set; }
 
-        public SqlServer()
-        {
-            _conStr = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-            if (string.IsNullOrEmpty(_conStr))
-                throw new ArgumentNullException("Provided Connection string is not present in Connection String Section of Config");
-        }
-       
-
-        public void ExecuteDataNQ(string command, Dictionary<string, object> parameters, CommandType commandType)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="parameters"></param>
+        /// <param name="commandType"></param>
+        public static void ExecuteDataNQ(string command, Dictionary<string, object> parameters, CommandType commandType)
         {
             Stopwatch innerWatch = new Stopwatch();
             innerWatch.Start();
 
-            using (SqlConnection connection = new SqlConnection(_conStr))
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 try
                 {
@@ -55,19 +53,26 @@ namespace WRC_API.HelperClass
                 {
                     if (connection.State != ConnectionState.Open)
                         connection.Close();
-                    innerWatch.Stop();
                 }
             }
 
         }
 
-        public async Task<DataSet> ExecuteData(string command, Dictionary<string, object> parameters, CommandType commandType)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="parameters"></param>
+        /// <param name="commandType"></param>
+        /// <returns></returns>
+        public async static Task<DataSet> ExecuteDataAsync(string command, Dictionary<string, object> parameters, CommandType commandType)
         {
             Stopwatch innerWatch = new Stopwatch();
-            DataTable dtData = new DataTable();
             DataSet dsData = new DataSet();
+
             innerWatch.Start();
-            using (SqlConnection connection = new SqlConnection(_conStr))
+
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 try
                 {
@@ -82,10 +87,12 @@ namespace WRC_API.HelperClass
                             sqlCommand.Parameters.Add(new SqlParameter(param.Key, param.Value));
                         }
 
-                        //SqlDataReader dr = await sqlCommand.ExecuteReaderAsync();
-                        //dtData.Load(dr);
-                        SqlDataAdapter dr =new SqlDataAdapter(sqlCommand);                        
-                        dr.Fill(dsData);
+                        SqlDataAdapter dataAdaptor = new SqlDataAdapter(sqlCommand);
+                        await Task.Run(() =>
+                            {
+                                dataAdaptor.Fill(dsData);
+                            });
+
                         innerWatch.Stop();
                         AppLogger.LogTimer(innerWatch);
                     }
@@ -94,15 +101,12 @@ namespace WRC_API.HelperClass
                 {
                     innerWatch.Stop();
                     AppLogger.LogError(ex);
-                    // return 1;
                 }
                 finally
                 {
                     if (connection.State != ConnectionState.Open)
                         connection.Close();
-                    innerWatch.Stop();
                 }
-                //return dtData;
                 return dsData;
             }
         }
