@@ -39,7 +39,7 @@ namespace WRC_API.HelperClass
                         {
                             sqlCommand.Parameters.Add(new SqlParameter(param.Key, param.Value));
                         }
-                        sqlCommand.ExecuteNonQueryAsync();
+                        sqlCommand.ExecuteNonQuery();
                         innerWatch.Stop();
                         AppLogger.LogTimer(innerWatch);
                     }
@@ -51,7 +51,7 @@ namespace WRC_API.HelperClass
                 }
                 finally
                 {
-                    if (connection.State != ConnectionState.Open)
+                    if (connection.State != ConnectionState.Closed)
                         connection.Close();
                 }
             }
@@ -104,7 +104,7 @@ namespace WRC_API.HelperClass
                 }
                 finally
                 {
-                    if (connection.State != ConnectionState.Open)
+                    if (connection.State != ConnectionState.Closed)
                         connection.Close();
                 }
                 return dsData;

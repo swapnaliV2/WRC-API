@@ -22,7 +22,12 @@ namespace WRC_API.Services
         public void RaiseDBRequestAndForget(string commmandName, Dictionary<string, object> Parameters)
         {
             Task.Run(() =>
-                SqlServer.ExecuteDataNQ(commmandName, Parameters, CommandType.StoredProcedure));
+               ProcessDBOperation(commmandName, Parameters));
+        }
+
+        void ProcessDBOperation(string commmandName, Dictionary<string, object> Parameters)
+        {
+            SqlServer.ExecuteDataNQ(commmandName, Parameters, CommandType.StoredProcedure);
         }
 
         /// <summary>
