@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -37,7 +39,18 @@ namespace WRC_API.HelperClass
                         sqlCommand.CommandType = commandType;
                         foreach (var param in parameters)
                         {
-                            sqlCommand.Parameters.Add(new SqlParameter(param.Key, param.Value));
+                            if (param.Value is JObject)
+                            {
+                                var jObject = (param.Value as JObject);
+                                var jTypeValue = Type.GetType(Convert.ToString(((Newtonsoft.Json.Linq.JValue)(jObject["ObjectType"])).Value));
+                                var jDataValue = ((Newtonsoft.Json.Linq.JValue)(jObject["ObjectData"])).Value;
+
+                                var paramValue = Encoding.ASCII.GetBytes(Convert.ToString(jDataValue));
+                                sqlCommand.Parameters.Add(new SqlParameter(param.Key, paramValue));
+
+                            }
+                            else
+                                sqlCommand.Parameters.Add(new SqlParameter(param.Key, param.Value));
                         }
                         sqlCommand.ExecuteNonQuery();
                         innerWatch.Stop();
