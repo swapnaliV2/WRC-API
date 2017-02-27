@@ -12,6 +12,7 @@ using System.IO.Compression;
 using System.Text.RegularExpressions;
 using WRC_API.HelperClass;
 using System.Data;
+using Newtonsoft.Json.Linq;
 namespace WRC_API.Controllers
 {
     [RoutePrefix("View")]
@@ -41,15 +42,25 @@ namespace WRC_API.Controllers
             Stopwatch watch = new Stopwatch();
             watch.Start();
             DataSet Result = await _renderService.ExecuteDataSet(commanName, paramSet);
-
-            var JsonResult = JsonConvert.SerializeObject(Result, Formatting.None);
-            var minifyJson = Regex.Replace(JsonResult, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
-            var compStr = GZip.GZipCompressDecompress.Zip(minifyJson);
+            var compStr = CommonClass.MiniFyAndCompressData(Result);
             watch.Stop();
 
             AppLogger.LogTimerAPI(watch);
 
             return compStr;
+        }
+
+        [Route("RenderView/{viewId}"), HttpPost]
+        public async Task<string> RenderViewFromSite([FromUri] int viewId, [FromBody]Dictionary<string, object> paramSet)
+        {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            string result = await _renderService.RenderViewData(viewId, paramSet);
+            watch.Stop();
+
+            AppLogger.LogTimerAPI(watch);
+
+            return result;
         }
     }
 }
