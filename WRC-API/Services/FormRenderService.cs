@@ -48,7 +48,7 @@ namespace WRC_API.Services
         /// <param name="commmandName"></param>
         /// <param name="Parameters"></param>
         /// <returns></returns>
-        public async Task<string> RenderViewData(int viewId, Dictionary<string, object> parameters)
+        public async Task<object> RenderViewData(int viewId, Dictionary<string, object> parameters)
         {
             var isGlobalData = parameters["@Global"];
             var isFrequentData = parameters["@Frequent"];
@@ -77,11 +77,12 @@ namespace WRC_API.Services
                 if (dataSet.Tables.Count > 2)
                     obje.Add("s", dataSet.Tables[2]);
 
-                string jsonString = string.Empty;
-
                 try
                 {
-                    jsonString = CommonClass.ConvertToJsonString(obje);
+                    if (Convert.ToString(isEncryptData) == "1")
+                    {
+                        return CommonClass.MiniFyAndCompressData(obje);
+                    }
                 }
                 catch (JsonSerializationException exception)
                 {
@@ -89,11 +90,8 @@ namespace WRC_API.Services
                     throw;
                 }
 
-                if (Convert.ToString(isEncryptData) == "1")
-                {
-                    return CommonClass.MiniFyAndCompressData(jsonString);
-                }
-                return jsonString;
+
+                return obje;
             }
         }
     }

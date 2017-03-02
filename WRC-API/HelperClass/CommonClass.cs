@@ -23,6 +23,11 @@ namespace WRC_API.HelperClass
             var JsonResult = JsonConvert.SerializeObject(dataToCompress, Formatting.None);
             var minifyJson = Regex.Replace(JsonResult, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
             var compStr = GZip.GZipCompressDecompress.Zip(minifyJson);
+            return JsonResult;
+        }
+        public static string CompressData(string dataToCompress)
+        {
+            var compStr = GZip.GZipCompressDecompress.Zip(dataToCompress);
             return compStr;
         }
 
