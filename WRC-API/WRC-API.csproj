@@ -130,6 +130,9 @@
     <Compile Include="HelperClass\CommonClass.cs" />
     <Compile Include="HelperClass\ComplextDataModel.cs" />
     <Compile Include="HelperClass\SqlServer.cs" />
+    <Compile Include="Model\Frequent.cs" />
+    <Compile Include="Model\Global.cs" />
+    <Compile Include="Model\Specific.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\FormRenderService.cs" />
   </ItemGroup>
