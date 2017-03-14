@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
+using WRC_API.Model;
 
 namespace WRC_API.HelperClass
 {
@@ -45,6 +46,21 @@ namespace WRC_API.HelperClass
             }
             return jsonString;
 
+        }
+
+        public static ContentType ConvertToContentType(int contentType)
+        {
+            switch (contentType)
+            {
+                case 0:
+                    return ContentType.Static;
+                case 1:
+                    return ContentType.COC;
+                case 2:
+                    return ContentType.Search;
+            }
+
+            return default(ContentType);
         }
     }
 }

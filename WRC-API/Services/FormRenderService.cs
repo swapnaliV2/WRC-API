@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using WRC_API.HelperClass;
+using WRC_API.Model;
 
 namespace WRC_API.Services
 {
@@ -48,7 +49,7 @@ namespace WRC_API.Services
         /// <param name="commmandName"></param>
         /// <param name="Parameters"></param>
         /// <returns></returns>
-        public async Task<object> RenderViewData(int viewId, Dictionary<string, object> parameters)
+        public async Task<object> RenderViewData(int siteId, int viewId, Dictionary<string, object> parameters)
         {
             var isGlobalData = parameters["@Global"];
             var isFrequentData = parameters["@Frequent"];
@@ -56,6 +57,7 @@ namespace WRC_API.Services
             string commmandName = "Sp_RenderView";
 
             Dictionary<string, object> commandParameters = new Dictionary<string, object>();
+            commandParameters.Add("@SiteId", siteId);
             commandParameters.Add("@ViewId", viewId);
 
             using (DataSet dataSet = await SqlServer.ExecuteDataAsync(commmandName, commandParameters, CommandType.StoredProcedure))
@@ -64,18 +66,33 @@ namespace WRC_API.Services
 
                 if (Convert.ToString(isGlobalData) == "1")
                 {
-                    if (dataSet.Tables.Count > 0)
-                        obje.Add("g", dataSet.Tables[0]);
+                    if (dataSet.Tables.Count > 0 && dataSet.Tables[0].Rows.Count > 0)
+                    {
+                        var dataRow = dataSet.Tables[0].Rows[0];
+                        obje.Add("g", new Global(dataSet.Tables[1])
+                        {
+                            Oid = int.Parse(dataRow["Id"].ToString()),
+                            Name = dataRow["Name"].ToString(),
+                            URL = dataRow["url"].ToString(),
+                            Logo = (byte[])dataRow["Logo"],
+                            Title = dataRow["Title"].ToString(),
+                            IsActive = Convert.ToBoolean(dataRow["IsActive"])
+                        });
+                    }
                 }
 
                 if (Convert.ToString(isFrequentData) == "1")
                 {
-                    if (dataSet.Tables.Count > 1)
-                        obje.Add("f", dataSet.Tables[1]);
+                    //if (dataSet.Tables.Count > 1)
+                    //    obje.Add("f", dataSet.Tables[1]);
                 }
 
                 if (dataSet.Tables.Count > 2)
-                    obje.Add("s", dataSet.Tables[2]);
+                    obje.Add("s", dataSet.Tables[2].AsEnumerable().Select(dataRow => new Specific(dataSet.Tables[3])
+                    {
+                        Oid = int.Parse(dataRow["Id"].ToString()),
+                        Orientation = dataRow["Orientation"].ToString()
+                    }).ToList());
 
                 try
                 {

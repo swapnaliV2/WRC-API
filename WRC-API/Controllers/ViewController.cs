@@ -50,14 +50,14 @@ namespace WRC_API.Controllers
             return compStr;
         }
 
-        [Route("RenderView/{viewId}"), HttpPost]
-        public async Task<object> RenderViewFromSite([FromUri] int viewId, [FromBody]Dictionary<string, object> paramSet)
+        [Route("RenderView/{siteId}/{viewId}"), HttpPost]
+        public async Task<object> RenderViewFromSite([FromUri] int siteId, [FromUri] int viewId, [FromBody]Dictionary<string, object> paramSet)
         {
             Request.Headers.Add("Accept-Encoding", "gzip");
 
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            object result = await _renderService.RenderViewData(viewId, paramSet);
+            object result = await _renderService.RenderViewData(siteId, viewId, paramSet);
             watch.Stop();
 
             AppLogger.LogTimerAPI(watch);
