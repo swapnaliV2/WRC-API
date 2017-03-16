@@ -20,13 +20,13 @@ namespace WRC_API.Model
             Data = new List<ContentData>();
             Data.AddRange(contentData.AsEnumerable().Select(dataRow => new ContentData()
             {
-                Oid = int.Parse(dataRow["Id"].ToString()),
-                Name = dataRow["Name"].ToString(),
-                Type = CommonClass.ConvertToContentType(Convert.ToInt32(dataRow["ContentType"])),
-                Orientation = dataRow["Orientation"].ToString(),
-                Data = dataRow["Orientation"],
-                Description = dataRow["Descr"].ToString(),
-                Order = int.Parse(dataRow["Id"].ToString())
+                Oid = CommonClass.GetRowData<int>(dataRow["Id"]),
+                Name = CommonClass.GetRowData<string>(dataRow["Name"]),
+                Type = CommonClass.ConvertToContentType(Convert.ToInt32(dataRow["Type"])),
+                Orientation = CommonClass.GetRowData<string>(dataRow["Orientation"]),
+                Data = CommonClass.GetRowData<string>(dataRow["Data"]),
+                Description = CommonClass.GetRowData<string>(dataRow["Description"]),
+                Order = CommonClass.GetRowData<int>(dataRow["Order"])
             }));
         }
 

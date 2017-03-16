@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Web;
+using WRC_API.HelperClass;
 
 namespace WRC_API.Model
 {
@@ -20,11 +21,11 @@ namespace WRC_API.Model
             Menu = new List<Menu>();
             Menu.AddRange(menuData.AsEnumerable().Select(dataRow => new Menu()
                        {
-                           Oid = int.Parse(dataRow["Id"].ToString()),
-                           Name = dataRow["Name"].ToString(),
-                           IsExternal = Convert.ToBoolean(dataRow["IsExternal"].ToString()),
-                           Order = int.Parse(dataRow["Order"].ToString()),
-                           ViewId = int.Parse(dataRow["ViewId"].ToString())
+                           Oid = CommonClass.GetRowData<int>(dataRow["Id"]),
+                           Name = CommonClass.GetRowData<string>(dataRow["Name"]),
+                           IsExternal = CommonClass.GetRowData<bool>(dataRow["IsExternal"]),
+                           Order = CommonClass.GetRowData<int>(dataRow["Order"]),
+                           ViewId = CommonClass.GetRowData<int>(dataRow["ViewId"])
                        }));
         }
 

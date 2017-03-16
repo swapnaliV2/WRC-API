@@ -19,13 +19,15 @@ namespace WRC_API.HelperClass
             //var decomStr1 = GZipCompressDecompress.UnZip(comStr); 
         }
 
-        public static string MiniFyAndCompressData(object dataToCompress)
+        public static string MiniFyAndCompressData(string dataToCompress)
         {
             var JsonResult = JsonConvert.SerializeObject(dataToCompress, Formatting.None);
             var minifyJson = Regex.Replace(JsonResult, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
             var compStr = GZip.GZipCompressDecompress.Zip(minifyJson);
-            return JsonResult;
+            return dataToCompress;
         }
+        
+        
         public static string CompressData(string dataToCompress)
         {
             var compStr = GZip.GZipCompressDecompress.Zip(dataToCompress);
@@ -61,6 +63,17 @@ namespace WRC_API.HelperClass
             }
 
             return default(ContentType);
+        }
+
+        public static T GetRowData<T>(object dr)
+        {
+            if (!object.ReferenceEquals(dr, null) && !(dr is System.DBNull))
+            {
+                if (typeof(T) == typeof(byte[]))
+                    return (T)Convert.ChangeType(System.Text.Encoding.ASCII.GetBytes(Convert.ToString(dr)), typeof(T));
+                return (T)Convert.ChangeType(dr, typeof(T));
+            }
+            return default(T);
         }
     }
 }

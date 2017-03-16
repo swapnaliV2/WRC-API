@@ -37,17 +37,18 @@ namespace WRC_API.Controllers
         }
 
         [Route("ExecuteDS/{commanName}"), HttpPost]
-        public async Task<string> ExecuteDataset([FromUri] string commanName, [FromBody]Dictionary<string, object> paramSet)
+        public async Task<object> ExecuteDataset([FromUri] string commanName, [FromBody]Dictionary<string, object> paramSet)
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
             DataSet Result = await _renderService.ExecuteDataSet(commanName, paramSet);
-            var compStr = CommonClass.MiniFyAndCompressData(Result);
+            //           var compStr = CommonClass.MiniFyAndCompressData(JsonResult);
+
             watch.Stop();
 
             AppLogger.LogTimerAPI(watch);
 
-            return compStr;
+            return Result;
         }
 
         [Route("RenderView/{siteId}/{viewId}"), HttpPost]
