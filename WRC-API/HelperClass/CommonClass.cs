@@ -21,8 +21,7 @@ namespace WRC_API.HelperClass
 
         public static string MiniFyAndCompressData(string dataToCompress)
         {
-            var JsonResult = JsonConvert.SerializeObject(dataToCompress, Formatting.None);
-            var minifyJson = Regex.Replace(JsonResult, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
+            var minifyJson = Regex.Replace(dataToCompress, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");
             var compStr = GZip.GZipCompressDecompress.Zip(minifyJson);
             return dataToCompress;
         }
