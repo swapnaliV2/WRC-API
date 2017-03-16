@@ -71,12 +71,12 @@ namespace WRC_API.Services
                         var dataRow = dataSet.Tables[0].Rows[0];
                         obje.Add("g", new Global(dataSet.Tables[1])
                         {
-                            Oid = int.Parse(dataRow["Id"].ToString()),
-                            Name = dataRow["Name"].ToString(),
-                            URL = dataRow["url"].ToString(),
-                            Logo = (byte[])dataRow["Logo"],
-                            Title = dataRow["Title"].ToString(),
-                            IsActive = Convert.ToBoolean(dataRow["IsActive"])
+                            Oid = CommonClass.GetRowData<int>(dataRow["Id"]),
+                            Name = CommonClass.GetRowData<string>(dataRow["Name"]),
+                            URL = CommonClass.GetRowData<string>(dataRow["url"]),
+                            Logo = CommonClass.GetRowData<byte[]>(dataRow["Logo"]),
+                            Title = CommonClass.GetRowData<string>(dataRow["Title"]),
+                            IsActive = CommonClass.GetRowData<bool>(dataRow["IsActive"])
                         });
                     }
                 }
@@ -90,15 +90,16 @@ namespace WRC_API.Services
                 if (dataSet.Tables.Count > 2)
                     obje.Add("s", dataSet.Tables[2].AsEnumerable().Select(dataRow => new Specific(dataSet.Tables[3])
                     {
-                        Oid = int.Parse(dataRow["Id"].ToString()),
-                        Orientation = dataRow["Orientation"].ToString()
+                        Oid = CommonClass.GetRowData<int>(dataRow["Id"]),
+                        Orientation = CommonClass.GetRowData<string>(dataRow["Orientation"])
                     }).ToList());
 
                 try
                 {
                     if (Convert.ToString(isEncryptData) == "1")
                     {
-                        return CommonClass.MiniFyAndCompressData(obje);
+                        var JsonResult = JsonConvert.SerializeObject(obje, Formatting.None);
+                        return CommonClass.MiniFyAndCompressData(JsonResult);
                     }
                 }
                 catch (JsonSerializationException exception)

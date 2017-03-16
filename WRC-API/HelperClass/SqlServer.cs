@@ -97,7 +97,14 @@ namespace WRC_API.HelperClass
                         sqlCommand.CommandType = commandType;
                         foreach (var param in parameters)
                         {
-                            sqlCommand.Parameters.Add(new SqlParameter(param.Key, param.Value));
+                            if (param.Value is JObject)
+                            {
+                                var byteData = ((Newtonsoft.Json.Linq.JValue)((param.Value as JObject)["ObjectData"])).Value;
+                                byte[] newParamValue = Encoding.ASCII.GetBytes(Convert.ToString(byteData));
+                                sqlCommand.Parameters.Add(new SqlParameter(param.Key, newParamValue));
+                            }
+                            else
+                                sqlCommand.Parameters.Add(new SqlParameter(param.Key, param.Value));
                         }
 
                         SqlDataAdapter dataAdaptor = new SqlDataAdapter(sqlCommand);
