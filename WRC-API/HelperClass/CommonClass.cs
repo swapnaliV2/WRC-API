@@ -25,8 +25,8 @@ namespace WRC_API.HelperClass
             var compStr = GZip.GZipCompressDecompress.Zip(minifyJson);
             return dataToCompress;
         }
-        
-        
+
+
         public static string CompressData(string dataToCompress)
         {
             var compStr = GZip.GZipCompressDecompress.Zip(dataToCompress);
@@ -68,7 +68,9 @@ namespace WRC_API.HelperClass
         {
             if (!object.ReferenceEquals(dr, null) && !(dr is System.DBNull))
             {
-                if (typeof(T) == typeof(byte[]))
+                if (typeof(T) == typeof(byte[]) && dr is byte[])
+                    return (T)Convert.ChangeType(dr, typeof(T));
+                else if (typeof(T) == typeof(byte[]) && dr is string)
                     return (T)Convert.ChangeType(System.Text.Encoding.ASCII.GetBytes(Convert.ToString(dr)), typeof(T));
                 return (T)Convert.ChangeType(dr, typeof(T));
             }
